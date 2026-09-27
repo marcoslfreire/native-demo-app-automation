@@ -1,0 +1,10 @@
+node_modules
+allure-results
+allure-report
+relatorio
+log
+apps
+.git
+.gitignore
+.env
+.env.*

@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+
 exports.config = {
     runner: 'local',
     port: 4723,
@@ -26,6 +27,31 @@ exports.config = {
 
     maxInstances: 1,
 
+    onPrepare: function () {
+        const data = new Date()
+
+        const dia = String(data.getDate()).padStart(2, '0')
+        const mes = String(data.getMonth() + 1).padStart(2, '0')
+        const ano = data.getFullYear()
+
+        const hora = String(data.getHours()).padStart(2, '0')
+        const minuto = String(data.getMinutes()).padStart(2, '0')
+
+        const dataFormatada = `${dia}-${mes}-${ano}`
+        const execucao = `executado-as-${hora}h${minuto}`
+
+        const diretorioExecucao = path.join(
+            process.cwd(),
+            'relatorio',
+            dataFormatada,
+            execucao
+        )
+
+        fs.mkdirSync(diretorioExecucao, { recursive: true })
+
+        process.env.REPORT_EXECUTION_DIR = diretorioExecucao
+    },
+
     logLevel: 'info',
 
     bail: 0,
@@ -46,14 +72,6 @@ exports.config = {
         { error, result, passed, duration },
         context
     ) {
-        const data = new Date()
-
-        const dia = String(data.getDate()).padStart(2, '0')
-        const mes = String(data.getMonth() + 1).padStart(2, '0')
-        const ano = data.getFullYear()
-
-        const dataFormatada = `${dia}-${mes}-${ano}`
-
         function normalizarNome(nome) {
             return nome
                 .normalize('NFD')
@@ -74,9 +92,7 @@ exports.config = {
         const nomeStep = normalizarNome(step.text)
 
         const diretorio = path.join(
-            process.cwd(),
-            'relatorio',
-            dataFormatada,
+            process.env.REPORT_EXECUTION_DIR,
             feature,
             cenario
         )
