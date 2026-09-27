@@ -1,0 +1,16 @@
+stages:
+  - test
+
+mobile-tests:
+  stage: test
+  image: node:24
+
+  script:
+    - npm ci
+    - npx wdio run wdio.conf.js
+
+  artifacts:
+    when: always
+    paths:
+      - allure-results/
+    expire_in: 7 days
