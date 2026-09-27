@@ -1,7 +1,7 @@
-# Dependências
+# Dependï¿½ncias
 node_modules/
 
-# Variáveis de ambiente
+# Variï¿½veis de ambiente
 .env
 .env.*
 
@@ -9,11 +9,11 @@ node_modules/
 allure-results/
 allure-report/
 
-# Arquivos temporários
+# Arquivos temporï¿½rios
 *.log
 *.tmp
 
-# Screenshots temporários
+# Screenshots temporï¿½rios
 tela-atual.png
 
 # Arquivos de backup
@@ -25,3 +25,5 @@ Thumbs.db
 
 # APK local
 apps/
+# RelatÃ³rios e screenshots de execuÃ§Ã£o
+relatorio/

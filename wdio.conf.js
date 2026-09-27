@@ -1,6 +1,7 @@
 const path = require('path')
+const fs = require('fs')
 exports.config = {
-    
+
     //
     // ====================
     // Runner Configuration
@@ -23,13 +24,33 @@ exports.config = {
     // The path of the spec files will be resolved relative from the directory of
     // of the config file unless it's absolute.
     //
+    // specs: [
+    //    './test/specs/**/*.js'
+    // ],
+
     specs: [
-        './test/specs/**/*.js'
+        './test/features/**/*.feature'
     ],
     // Patterns to exclude.
     exclude: [
         // 'path/to/excluded/files'
     ],
+
+    cucumberOpts: {
+    require: [
+        './test/step-definitions/**/*.js'
+    ],
+    timeout: 60000
+},
+
+beforeStep: function (step, scenario, context) {
+    console.log('>>> BEFORE STEP EXECUTADO:', step.text)
+    context.numeroStep = (context.numeroStep || 0) + 1
+},
+
+afterStep: async function (step, scenario, { error, result, passed, duration }, context) {
+    // ...
+},
     //
     // ============
     // Capabilities
@@ -46,20 +67,22 @@ exports.config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: 10,
+    maxInstances: 1,
+
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
-   capabilities: [{
-    platformName: 'Android',
-    'appium:deviceName': 'nightwatch-android-11',
-    'appium:automationName': 'UiAutomator2',
-    'appium:app': path.resolve('./apps/android.wdio.native.app.v2.2.0.apk'),
-    'appium:appPackage': 'com.wdiodemoapp',
-    'appium:appActivity': '.MainActivity'
-}],
-
+    capabilities: [{
+        platformName: 'Android',
+        'appium:deviceName': 'nightwatch-android-11',
+        'appium:automationName': 'UiAutomator2',
+        'appium:app': path.resolve('./apps/android.wdio.native.app.v2.2.0.apk'),
+        'appium:appPackage': 'com.wdiodemoapp',
+        'appium:appActivity': '.MainActivity',
+        'appium:noReset': false,
+        'wdio:maxInstances': 1
+    }],
     //
     // ===================
     // Test Configurations
@@ -115,8 +138,73 @@ exports.config = {
     //
     // Make sure you have the wdio adapter package for the specific framework installed
     // before running any tests.
-    framework: 'mocha',
-    
+    //framework: 'mocha',
+    framework: 'cucumber',
+    // cucumberOpts: {
+    //     require: ['./test/step-definitions/**/*.js'],
+    //    timeout: 60000
+    //},
+
+
+beforeStep: function (step, scenario, context) {
+    context.numeroStep = (context.numeroStep || 0) + 1
+},
+
+afterStep: async function (step, scenario, { error, result, passed, duration }, context) {
+    const data = new Date()
+
+    const dia = String(data.getDate()).padStart(2, '0')
+    const mes = String(data.getMonth() + 1).padStart(2, '0')
+    const ano = data.getFullYear()
+
+    const dataFormatada = `${dia}-${mes}-${ano}`
+
+    function normalizarNome(nome) {
+        return nome
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .toLowerCase()
+    }
+
+const feature = normalizarNome(
+    scenario.uri
+        ? path.basename(scenario.uri, '.feature')
+        : 'feature'
+)
+
+const cenario = normalizarNome(scenario.name)
+
+const nomeStep = normalizarNome(step.text)
+
+    const diretorio = path.join(
+        process.cwd(),
+        'relatorio',
+        dataFormatada,
+        feature,
+        cenario
+    )
+
+    if (!fs.existsSync(diretorio)) {
+        fs.mkdirSync(diretorio, { recursive: true })
+    }
+
+    const numeroStep = String(context.numeroStep).padStart(2, '0')
+
+    const nomeArquivo =
+        `${numeroStep}-${nomeStep}.png`
+
+    const caminhoCompleto = path.join(
+        diretorio,
+        nomeArquivo
+    )
+
+    await browser.saveScreenshot(caminhoCompleto)
+
+    console.log(`Screenshot salvo: ${caminhoCompleto}`)
+},
+
     //
     // The number of times to retry the entire specfile when it fails as a whole
     // specFileRetries: 1,
@@ -130,14 +218,11 @@ exports.config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
-    reporters: ['spec',['allure', {outputDir: 'allure-results'}]],
+    reporters: ['spec', ['allure', { outputDir: 'allure-results' }]],
 
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/
-    mochaOpts: {
-        ui: 'bdd',
-        timeout: 60000
-    },
+
 
     //
     // =====
@@ -233,7 +318,7 @@ exports.config = {
      * @param {boolean} result.passed    true if test has passed, otherwise false
      * @param {object}  result.retries   information about spec related retries, e.g. `{ attempts: 0, limit: 0 }`
      */
-    afterTest: async function(test, context, { error, result, duration, passed, retries }) {
+    afterTest: async function (test, context, { error, result, duration, passed, retries }) {
         if (!passed) {
             await browser.takeScreenshot();
         }
