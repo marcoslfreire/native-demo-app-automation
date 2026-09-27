@@ -27,3 +27,8 @@ Thumbs.db
 apps/
 # Relatórios e screenshots de execução
 relatorio/
+
+
+
+# Logs de execução
+log/
