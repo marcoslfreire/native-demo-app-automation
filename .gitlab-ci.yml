@@ -1,16 +1,33 @@
 stages:
-  - test
+  - validate
 
-mobile-tests:
-  stage: test
-  image: node:24
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+cache:
+  paths:
+    - .npm/
+
+validate_project:
+  stage: validate
+  image: node:24-bookworm
+
+  before_script:
+    - node --version
+    - npm --version
+    - npm ci
 
   script:
-    - npm ci
-    - npx wdio run wdio.conf.js
+    - npx wdio --version
+    - npx appium --version
+    - test -f wdio.base.conf.js
+    - test -f Dockerfile
+    - test -f .dockerignore
+    - test -d test/features
+    - test -d test/step-definitions
+    - test -d test/pages
+    - echo "Validacao da estrutura e das ferramentas concluida com sucesso."
 
-  artifacts:
-    when: always
-    paths:
-      - allure-results/
-    expire_in: 7 days
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'
