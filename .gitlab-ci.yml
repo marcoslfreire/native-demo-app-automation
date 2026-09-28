@@ -3,6 +3,7 @@ stages:
 
 variables:
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
+  GITHUB_REPOSITORY_URL: "https://github.com/marcoslfreire/native-demo-app-automation.git"
 
 cache:
   paths:
@@ -15,6 +16,12 @@ validate_project:
   before_script:
     - node --version
     - npm --version
+    - git --version
+    - rm -rf github-source
+    - git clone --depth 1 "$GITHUB_REPOSITORY_URL" github-source
+    - cd github-source
+    - echo "Commit do GitHub utilizado na validacao:"
+    - git rev-parse HEAD
     - npm ci
 
   script:
