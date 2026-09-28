@@ -1,5 +1,6 @@
 stages:
   - validate
+  - test
 
 variables:
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
@@ -17,10 +18,15 @@ validate_project:
     - node --version
     - npm --version
     - git --version
+    - echo "Obtendo commit enviado pelo webhook do GitHub..."
+    - GITHUB_SHA=$(node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.TRIGGER_PAYLOAD, 'utf8')); console.log(p.after)")
+    - echo "Commit do GitHub recebido:"
+    - echo "$GITHUB_SHA"
     - rm -rf github-source
-    - git clone --depth 1 "$GITHUB_REPOSITORY_URL" github-source
+    - git clone "$GITHUB_REPOSITORY_URL" github-source
     - cd github-source
-    - echo "Commit do GitHub utilizado na validacao:"
+    - git checkout "$GITHUB_SHA"
+    - echo "Commit efetivamente validado:"
     - git rev-parse HEAD
     - npm ci
 
@@ -28,6 +34,7 @@ validate_project:
     - npx wdio --version
     - npx appium --version
     - test -f wdio.base.conf.js
+    - test -f wdio.android.browserstack.conf.js
     - test -f Dockerfile
     - test -f .dockerignore
     - test -d test/features
@@ -36,5 +43,38 @@ validate_project:
     - echo "Validacao da estrutura e das ferramentas concluida com sucesso."
 
   rules:
-    - if: '$CI_COMMIT_BRANCH'
-    - if: '$CI_MERGE_REQUEST_IID'
+    - if: '$CI_PIPELINE_SOURCE == "trigger"'
+
+test_android_browserstack:
+  stage: test
+  image: node:24-bookworm
+
+  before_script:
+    - node --version
+    - npm --version
+    - git --version
+    - echo "Obtendo commit enviado pelo webhook do GitHub..."
+    - GITHUB_SHA=$(node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.TRIGGER_PAYLOAD, 'utf8')); console.log(p.after)")
+    - echo "Commit do GitHub recebido:"
+    - echo "$GITHUB_SHA"
+    - rm -rf github-source
+    - git clone "$GITHUB_REPOSITORY_URL" github-source
+    - cd github-source
+    - git checkout "$GITHUB_SHA"
+    - echo "Commit efetivamente executado:"
+    - git rev-parse HEAD
+    - npm ci
+
+  script:
+    - echo "Iniciando testes Android no BrowserStack..."
+    - npx wdio wdio.android.browserstack.conf.js
+
+  artifacts:
+    when: always
+    paths:
+      - github-source/allure-results/
+      - github-source/relatorio/
+    expire_in: 7 days
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "trigger"'
