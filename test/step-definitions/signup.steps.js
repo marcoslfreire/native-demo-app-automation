@@ -43,3 +43,10 @@ When('eu limpo os campos de cadastro', async () => {
     await SignUpPage.limparCampos()
 })
 
+Then('devo visualizar a mensagem de e-mail inválido no cadastro', async () => {
+    const mensagemVisivel =
+        await SignUpPage.mensagemEmailInvalidoEstaVisivel()
+
+    expect(mensagemVisivel).to.equal(true)
+})
+

@@ -1046,3 +1046,117 @@ Evidência / relatório
 | 8  | EXP-FORMS-008  | ⏳              |
 | 9  | EXP-FORMS-009  | ⏳              |
 | 10 | EXP-FORMS-007  | ⏳              |
+## 8. Cadastro — validação de e-mail inválido
+
+### Objetivo
+
+Validar o comportamento do aplicativo ao tentar realizar um cadastro utilizando um endereço de e-mail inválido.
+
+### Cenário explorado
+
+**Validar e-mail inválido com senha válida**
+
+### Dados utilizados
+
+* E-mail: `teste`
+* Senha: `Teste123`
+* Confirmação da senha: `Teste123`
+
+### Fluxo explorado
+
+1. Acessar a tela de Login.
+2. Navegar para a tela de Cadastro.
+3. Informar o e-mail `teste`.
+4. Informar a senha `Teste123`.
+5. Confirmar a senha `Teste123`.
+6. Clicar no botão `SIGN UP`.
+7. Validar a mensagem de erro apresentada pelo aplicativo.
+
+### Comportamento observado
+
+Ao informar o valor `teste` como e-mail e realizar a tentativa de cadastro, o aplicativo apresenta a mensagem:
+
+```text
+Please enter a valid email address
+```
+
+Nesse cenário, o cadastro não apresenta o diálogo de sucesso com o botão `OK`.
+
+Portanto, o fluxo de e-mail inválido possui um comportamento diferente do cadastro realizado com dados válidos.
+
+### Elemento identificado
+
+A mensagem foi localizada utilizando:
+
+```js
+$('android=new UiSelector().text("Please enter a valid email address")')
+```
+
+No Page Object `SignUpPage.js`, foi criado o getter:
+
+```js
+get mensagemEmailInvalido() {
+    return $('android=new UiSelector().text("Please enter a valid email address")')
+}
+```
+
+E o método de validação:
+
+```js
+async mensagemEmailInvalidoEstaVisivel() {
+    return await this.mensagemEmailInvalido.isDisplayed()
+}
+```
+
+### Step Definition
+
+Foi utilizado um Step específico para o cadastro:
+
+```gherkin
+Then devo visualizar a mensagem de e-mail inválido no cadastro
+```
+
+A diferenciação foi necessária porque já existia um Step com o mesmo nome relacionado ao fluxo de Login.
+
+### Cenário automatizado
+
+```gherkin
+Scenario: Validar e-mail inválido com senha válida
+    Given que estou na tela de cadastro
+    When eu informo o e-mail "teste"
+    And eu informo a senha "Teste123"
+    And eu confirmo a senha "Teste123"
+    And eu clico no botão de cadastro
+    Then devo visualizar a mensagem de e-mail inválido no cadastro
+```
+
+### Resultado da validação
+
+**VALIDADO — PASSOU**
+
+Execução local:
+
+```text
+6 passing (9.8s)
+
+Spec Files: 1 passed, 1 total
+100% completed
+```
+
+### Decisão técnica
+
+O cenário de e-mail inválido não deve utilizar o método de fechamento do diálogo de sucesso:
+
+```js
+fecharDialogoCadastroSucesso()
+```
+
+Esse comportamento pertence ao fluxo de cadastro válido.
+
+Para o cenário negativo, a automação valida diretamente a mensagem de validação apresentada pelo aplicativo.
+
+### Conclusão
+
+O comportamento explorado foi reproduzido e automatizado com sucesso em ambiente Android local.
+
+O cenário está **validado localmente** e pode permanecer como parte da cobertura automatizada do fluxo de Cadastro.

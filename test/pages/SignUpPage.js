@@ -24,6 +24,10 @@ class SignUpPage {
         return $('android=new UiSelector().text("Please enter the same password")')
     }
 
+    get mensagemEmailInvalido() {
+        return $('android=new UiSelector().text("Please enter a valid email address")')
+    }
+
     get mensagemSenhaInvalida() {
         return $('android=new UiSelector().text("Please enter at least 8 characters")')
     }
@@ -34,6 +38,9 @@ class SignUpPage {
 
     async mensagemConfirmacaoSenhaEstaVisivel() {
         return await this.mensagemConfirmacaoSenha.isDisplayed()
+    }
+    async mensagemEmailInvalidoEstaVisivel() {
+        return await this.mensagemEmailInvalido.isDisplayed()
     }
 
     async abrir() {

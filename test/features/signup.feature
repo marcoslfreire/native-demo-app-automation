@@ -31,4 +31,4 @@ Feature: Cadastro
         And eu informo a senha "Teste123"
         And eu confirmo a senha "Teste123"
         And eu clico no botão de cadastro
-        Then devo visualizar a tela principal
+        Then devo visualizar a mensagem de e-mail inválido no cadastro
