@@ -16,6 +16,10 @@ class SignUpPage {
         return $('~button-SIGN UP')
     }
 
+    get botaoOk() {
+        return $('android=new UiSelector().text("OK")')
+    }
+
     get mensagemConfirmacaoSenha() {
         return $('android=new UiSelector().text("Please enter the same password")')
     }
@@ -54,6 +58,14 @@ class SignUpPage {
 
     async clicarSignUp() {
         await this.signUpButton.click()
+    }
+
+    async fecharDialogoCadastroSucesso() {
+        await this.botaoOk.waitForDisplayed({
+            timeout: 5000
+        })
+
+        await this.botaoOk.click()
     }
 
     async preencherCadastro(email, password, repeatPassword) {

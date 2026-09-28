@@ -2,7 +2,7 @@ Feature: Cadastro
 
     Scenario: Realizar cadastro com dados válidos
         Given que estou na tela de cadastro
-        When eu informo o e-mail "[teste@gmail.com](mailto:teste@gmail.com)"
+        When eu informo o e-mail "teste@gmail.com"
         And eu informo a senha "Teste123"
         And eu confirmo a senha "Teste123"
         And eu clico no botão de cadastro

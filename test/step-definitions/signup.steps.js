@@ -7,8 +7,6 @@ Given('que estou na tela de cadastro', async () => {
     await SignUpPage.abrir()
 })
 
-
-
 When('eu confirmo a senha {string}', async (password) => {
     await SignUpPage.preencherConfirmacaoSenha(password)
 })
@@ -25,6 +23,8 @@ Then('devo visualizar a mensagem de confirmação de senha', async () => {
 })
 
 Then('devo visualizar a tela principal', async () => {
+    await SignUpPage.fecharDialogoCadastroSucesso()
+
     const telaPrincipal = await $('~Forms')
 
     const estaVisivel = await telaPrincipal.isDisplayed()
@@ -42,3 +42,4 @@ Then('devo visualizar a mensagem de senha inválida no cadastro', async () => {
 When('eu limpo os campos de cadastro', async () => {
     await SignUpPage.limparCampos()
 })
+
