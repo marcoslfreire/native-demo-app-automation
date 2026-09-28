@@ -18,10 +18,16 @@ validate_project:
     - node --version
     - npm --version
     - git --version
-    - echo "Obtendo commit enviado pelo webhook do GitHub..."
-    - GITHUB_SHA=$(node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.TRIGGER_PAYLOAD, 'utf8')); console.log(p.after)")
-    - echo "Commit do GitHub recebido:"
-    - echo "$GITHUB_SHA"
+    - |
+      if [ "$CI_PIPELINE_SOURCE" = "trigger" ]; then
+        echo "Obtendo commit enviado pelo webhook do GitHub..."
+        GITHUB_SHA=$(node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.TRIGGER_PAYLOAD, 'utf8')); console.log(p.after)")
+      else
+        echo "Execução manual: obtendo o commit atual da branch main do GitHub..."
+        GITHUB_SHA=$(git ls-remote "$GITHUB_REPOSITORY_URL" refs/heads/main | cut -f1)
+      fi
+      echo "Commit do GitHub utilizado:"
+      echo "$GITHUB_SHA"
     - rm -rf github-source
     - git clone "$GITHUB_REPOSITORY_URL" github-source
     - cd github-source
@@ -44,6 +50,7 @@ validate_project:
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "trigger"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
 
 test_android_browserstack:
   stage: test
@@ -53,10 +60,16 @@ test_android_browserstack:
     - node --version
     - npm --version
     - git --version
-    - echo "Obtendo commit enviado pelo webhook do GitHub..."
-    - GITHUB_SHA=$(node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.TRIGGER_PAYLOAD, 'utf8')); console.log(p.after)")
-    - echo "Commit do GitHub recebido:"
-    - echo "$GITHUB_SHA"
+    - |
+      if [ "$CI_PIPELINE_SOURCE" = "trigger" ]; then
+        echo "Obtendo commit enviado pelo webhook do GitHub..."
+        GITHUB_SHA=$(node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.TRIGGER_PAYLOAD, 'utf8')); console.log(p.after)")
+      else
+        echo "Execução manual: obtendo o commit atual da branch main do GitHub..."
+        GITHUB_SHA=$(git ls-remote "$GITHUB_REPOSITORY_URL" refs/heads/main | cut -f1)
+      fi
+      echo "Commit do GitHub utilizado:"
+      echo "$GITHUB_SHA"
     - rm -rf github-source
     - git clone "$GITHUB_REPOSITORY_URL" github-source
     - cd github-source
@@ -78,3 +91,4 @@ test_android_browserstack:
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "trigger"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
