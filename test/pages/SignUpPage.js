@@ -69,7 +69,7 @@ class SignUpPage {
 
     async fecharDialogoCadastroSucesso() {
         await this.botaoOk.waitForDisplayed({
-            timeout: 5000
+            timeout:9000
         })
 
         await this.botaoOk.click()

@@ -155,6 +155,10 @@ npm ci
 
 ```bash
 adb devices
+emulator -list-avds
+emulator -avd nightwatch-android-11
+adb devices
+npm run test:android
 ```
 
 ## 5. Executar os testes
